@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,19 +14,37 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         thisManager = this;
-        Time.timeScale = 0;
+        if (SceneManager.GetActiveScene().name == "SampleScene")
+        {
+            Time.timeScale = 0;
+            PlayerPrefs.SetInt("Score", 0);
+        }
     }
 
     void Update()
     {
-        if (Time.timeScale == 0 && Input.GetKeyDown(KeyCode.Return))
-            StartGame();
+
+        if (SceneManager.GetActiveScene().name == "SampleScene")
+        {
+            if (Time.timeScale == 0 && Input.GetKeyDown(KeyCode.Return))
+                StartGame();
+        }
+        else 
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+                PlayerPrefs.DeleteAll();
+
+            Txt_Score.text = "SCORE: " + PlayerPrefs.GetInt("Score");
+            Txt_Message.text = "HIGHSCORE: " + PlayerPrefs.GetInt("HighScore");
+        }
     }
 
     public void UpdateScore(int value)
     {
         Score += value;
         Txt_Score.text = "SCORE : " + Score;
+        PlayerPrefs.SetInt("Score", Score);
+        print("score" + PlayerPrefs.GetInt("Score"));
     }
 
     private void StartGame()
@@ -39,7 +58,18 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         Time.timeScale = 0;
-        Txt_Message.text = "GAMEOVER! \nPRESS ENTER TO RESTART GAME.";
-        Txt_Message.color = Color.red;
+        /*Txt_Message.text = "GAMEOVER! \nPRESS ENTER TO RESTART GAME.";
+        Txt_Message.color = Color.red;*/
+        if (PlayerPrefs.GetInt("HighScore") < PlayerPrefs.GetInt("Score"))
+        {
+            print("hs" + PlayerPrefs.GetInt("HighScore"));
+            PlayerPrefs.SetInt("HighScore", PlayerPrefs.GetInt("Score"));
+        }
+        SceneManager.LoadScene("GameOver");
+    }
+
+    public void RestartBtn()
+    {
+        SceneManager.LoadScene("SampleScene");
     }
 }
